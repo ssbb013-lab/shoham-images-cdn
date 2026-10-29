@@ -1,0 +1,13 @@
+{
+  "name": "shoham-images-cdn",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "shoham-images" }],
+  "vars": {
+    "CDN_HOST": "cdn.kiwi-kids.co.il",
+    "ADMIN_HOST": "images.kiwi-kids.co.il",
+    "CF_ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "REPLACE_WITH_ACCESS_APPLICATION_AUD"
+  }
+}
