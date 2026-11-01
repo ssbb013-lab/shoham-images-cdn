@@ -48,9 +48,9 @@ export default {
       }
       return denial(404);
     }
-    if (host!==env.CDN_HOST.toLowerCase() && host!=='shoham-images-cdn.shlomyb.workers.dev') return denial(404);
+    if (host!==env.CDN_HOST.toLowerCase() && !host.endsWith('.shlomyb.workers.dev')) return new Response('Host not allowed',{status:404,headers:{'x-cdn-debug':'host-mismatch','cache-control':'no-store'}});
     if (!['GET','HEAD'].includes(request.method)) return new Response('Method not allowed',{status:405,headers:{allow:'GET, HEAD'}});
-    if (url.search) return denial(404);
+    if ([...url.searchParams.keys()].some(k => !['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].includes(k))) return denial(404);
     const match=url.pathname.match(/^\/(\d{8,18})(?:\.(?:jpg|jpeg|png|webp|gif))?$/i);
     if (!match) return denial();
     const key=match[1];
@@ -61,7 +61,7 @@ export default {
         if (object) break;
       }
     }
-    if (!object) return denial(404);
+    if (!object) return new Response('Image not found in R2',{status:404,headers:{'cache-control':'no-store','x-cdn-debug':'r2-object-missing'}});
     const headers=new Headers(); object.writeHttpMetadata(headers);
     if (!ALLOWED.has(headers.get('content-type'))) return denial(404);
     headers.set('etag',object.httpEtag);
