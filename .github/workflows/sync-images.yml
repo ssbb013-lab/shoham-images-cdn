@@ -1,0 +1,53 @@
+name: Sync FTP or SFTP to R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Preview only - do not upload'
+        type: boolean
+        required: true
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ftp-r2-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      SOURCE_PROTOCOL: ${{ vars.SOURCE_PROTOCOL }}
+      SOURCE_HOST: ${{ vars.SOURCE_HOST }}
+      SOURCE_PORT: ${{ vars.SOURCE_PORT }}
+      SOURCE_PATH: ${{ vars.SOURCE_PATH }}
+      SOURCE_SSH_SHA256: ${{ vars.SOURCE_SSH_SHA256 }}
+      SOURCE_USER: ${{ secrets.SOURCE_USER }}
+      SOURCE_PASSWORD: ${{ secrets.SOURCE_PASSWORD }}
+      SOURCE_SSH_KEY_B64: ${{ secrets.SOURCE_SSH_KEY_B64 }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: shoham-images
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install FTP/SFTP and R2 dependencies
+        run: python -m pip install 'boto3>=1.35,<2' 'paramiko>=3.4,<5'
+      - name: Validate configuration
+        run: |
+          test -n "$SOURCE_PROTOCOL" || (echo 'Missing SOURCE_PROTOCOL variable' && exit 1)
+          test -n "$SOURCE_HOST" || (echo 'Missing SOURCE_HOST variable' && exit 1)
+          test -n "$SOURCE_USER" || (echo 'Missing SOURCE_USER secret' && exit 1)
+          test -n "$R2_ACCOUNT_ID" || (echo 'Missing R2_ACCOUNT_ID secret' && exit 1)
+          test -n "$R2_ACCESS_KEY_ID" || (echo 'Missing R2_ACCESS_KEY_ID secret' && exit 1)
+          test -n "$R2_SECRET_ACCESS_KEY" || (echo 'Missing R2_SECRET_ACCESS_KEY secret' && exit 1)
+      - name: Synchronize images
+        run: python sync/sync.py
