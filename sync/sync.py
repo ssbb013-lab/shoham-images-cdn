@@ -152,11 +152,21 @@ def main():
             key=m.group(1)
             if key in checked:duplicates.add(key)
             checked.add(key)
+        candidates=[]
         for path,size,modified in src.files(root):
             m=FILE.fullmatch(posixpath.basename(path))
-            if not m or size<=0 or size>MAX_BYTES:continue
+            if not m or size<=0 or size>MAX_BYTES: continue
             key,extension=m.group(1),m.group(2).lower()
-            if key in duplicates:continue
+            if key in duplicates: continue
+            try:
+                timestamp=(dt.datetime.strptime(modified[:14],'%Y%m%d%H%M%S').replace(tzinfo=dt.timezone.utc).timestamp()
+                    if len(modified)>=14 and modified[:14].isdigit() else float(modified))
+            except (ValueError,OverflowError,TypeError): continue
+            candidates.append((timestamp,path,size,modified,key,extension))
+        candidates.sort(key=lambda item:(-item[0],item[1]))
+        LOG.info('Pilot selecting at most 10 newest images from %d candidates',len(candidates))
+        for timestamp,path,size,modified,key,extension in candidates[:10]:
+            LOG.info('SELECTED key=%s modified=%s',key,modified)
             meta={'source-path-sha256':hashlib.sha256(path.encode()).hexdigest(),'source-size':str(size),'source-mtime':modified or 'unknown'}
             try:
                 try:
