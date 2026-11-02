@@ -47,8 +47,8 @@ async function sourceApi(request,env,url) {
     if(!env.SOURCE_ENCRYPTION_KEY) return json({error:'Encryption key not configured'},503);
     if(Number(request.headers.get('content-length'))>8192) return json({error:'Payload too large'},413);
     let p;try{p=await request.json()}catch{return json({error:'Invalid JSON'},400)}
-    if(typeof p?.source_path==='string' && p.source_path==='\\\\') p.source_path='/';
-    if(!validSource(p))return json({error:'Invalid source settings',hint:'Check source name, host, source path (must start with /), username and password, protocol and interval'},400);
+    if(typeof p?.source_path==='string') { p.source_path=p.source_path.trim().replace(/\\\\/g,'/'); if(p.source_path==='') p.source_path='/'; }
+    if(!validSource(p)){const errors=[];if(!/^[\\p{L}\\p{N} ._-]{1,80}$/u.test(p?.name||''))errors.push('name');if(!['ftp','sftp'].includes(p?.protocol))errors.push('protocol');if(!/^(?!-)[A-Za-z0-9.-]{1,253}$/.test(p?.host||''))errors.push('host');if(!Number.isInteger(p?.port)||p.port<1||p.port>65535)errors.push('port');if(typeof p?.source_path!=='string'||!p.source_path.startsWith('/')||p.source_path.length>512)errors.push('source_path');if(!p?.username||p.username.length>128)errors.push('username');if(!p?.password||p.password.length>512)errors.push('password');if(![5,15,30,60,1440].includes(p?.interval_minutes))errors.push('interval_minutes');if(p?.ssh_fingerprint&&!/^SHA256:[A-Za-z0-9+/]{32,64}=?$/.test(p.ssh_fingerprint))errors.push('ssh_fingerprint');return json({error:'Invalid source settings',fields:errors},400);}
     if(p.protocol==='sftp' && !p.ssh_fingerprint)return json({error:'SFTP host fingerprint required'},400);
     const encrypted=await encryptSecret(p.password,env);
     const id=crypto.randomUUID();
