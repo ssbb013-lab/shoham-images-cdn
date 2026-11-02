@@ -5,7 +5,7 @@
   "workers_dev": true,
   "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "shoham-images" }],
   "vars": {
-    "CDN_HOST": "cdn.kiwi-kids.co.il",
+    "CDN_HOST": "cdn.kiwi-technology.com",
     "ADMIN_HOST": "images.kiwi-kids.co.il",
     "CF_ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM.cloudflareaccess.com",
     "CF_ACCESS_AUD": "REPLACE_WITH_ACCESS_APPLICATION_AUD"
