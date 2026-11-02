@@ -3,11 +3,23 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
-  "r2_buckets": [{ "binding": "IMAGES", "bucket_name": "shoham-images" }],
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "shoham-images"
+    }
+  ],
   "vars": {
     "CDN_HOST": "cdn.kiwi-technology.com",
     "ADMIN_HOST": "admin.kiwi-technology.com",
     "CF_ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM.cloudflareaccess.com",
     "CF_ACCESS_AUD": "REPLACE_WITH_ACCESS_APPLICATION_AUD"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "shoham-images-db",
+      "database_id": "69fde518-8df3-446d-9acb-391ba3fe3557"
+    }
+  ]
 }
