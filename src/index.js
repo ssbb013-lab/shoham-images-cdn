@@ -28,7 +28,7 @@ async function encryptSecret(secret, env){
   const data=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(secret));
   return {cipher:b64(new Uint8Array(data)),iv:b64(iv)};
 }
-const validSource = p => p && /^[a-zA-Z0-9 ._-]{1,80}$/.test(p.name||'') &&
+const validSource = p => p && /^[\p{L}\p{N} ._-]{1,80}$/u.test(p.name||'') &&
   ['ftp','sftp'].includes(p.protocol) &&
   typeof p.host==='string' && /^(?!-)[A-Za-z0-9.-]{1,253}$/.test(p.host) &&
   Number.isInteger(p.port) && p.port>=1 && p.port<=65535 &&
@@ -47,7 +47,8 @@ async function sourceApi(request,env,url) {
     if(!env.SOURCE_ENCRYPTION_KEY) return json({error:'Encryption key not configured'},503);
     if(Number(request.headers.get('content-length'))>8192) return json({error:'Payload too large'},413);
     let p;try{p=await request.json()}catch{return json({error:'Invalid JSON'},400)}
-    if(!validSource(p))return json({error:'Invalid source settings'},400);
+    if(typeof p?.source_path==='string' && p.source_path==='\\\\') p.source_path='/';
+    if(!validSource(p))return json({error:'Invalid source settings',hint:'Check source name, host, source path (must start with /), username and password, protocol and interval'},400);
     if(p.protocol==='sftp' && !p.ssh_fingerprint)return json({error:'SFTP host fingerprint required'},400);
     const encrypted=await encryptSecret(p.password,env);
     const id=crypto.randomUUID();
