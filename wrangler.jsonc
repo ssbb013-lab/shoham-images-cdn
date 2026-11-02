@@ -12,8 +12,8 @@
   "vars": {
     "CDN_HOST": "cdn.kiwi-technology.com",
     "ADMIN_HOST": "admin.kiwi-technology.com",
-    "CF_ACCESS_TEAM_DOMAIN": "REPLACE_WITH_TEAM.cloudflareaccess.com",
-    "CF_ACCESS_AUD": "REPLACE_WITH_ACCESS_APPLICATION_AUD"
+    "CF_ACCESS_TEAM_DOMAIN": "still-tree-52b1.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "bbf8353535c093265eba97241c716d659937faeb1d623eddeefd12e485c38276"
   },
   "d1_databases": [
     {
